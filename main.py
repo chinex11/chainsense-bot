@@ -63,4 +63,12 @@ def serve(cfg: dict, dry_run: bool) -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit as e:
+        if e.code not in (0, None) and not isinstance(e.code, int):
+            print(f"::error title=Chainsense bot::{e.code}")
+        raise
+    except Exception as e:  # noqa: BLE001 — surface the reason on the GitHub run page
+        print(f"::error title=Chainsense bot::{type(e).__name__}: {e}")
+        raise
