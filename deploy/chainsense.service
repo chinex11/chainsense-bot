@@ -1,0 +1,14 @@
+[Unit]
+Description=Chainsense crypto bot (watch alerts + daily brief)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/chainsense-bot
+ExecStart=/opt/chainsense-bot/.venv/bin/python main.py serve
+Restart=always
+RestartSec=30
+User=chainsense
+
+[Install]
+WantedBy=multi-user.target

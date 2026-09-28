@@ -1,0 +1,32 @@
+name: Chainsense watch alerts
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 min (GitHub may delay scheduled runs by a few minutes)
+  workflow_dispatch: {}
+
+concurrency: { group: chainsense-watch, cancel-in-progress: false }
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - name: Load config from secret
+        env: { CFG: "${{ secrets.CHAINSENSE_CONFIG_YAML }}" }
+        run: if [ -n "$CFG" ]; then printf '%s' "$CFG" > config.yaml; fi
+      - uses: actions/cache/restore@v4
+        with: { path: state, key: "state-watch-${{ github.run_id }}", restore-keys: "state-watch-" }
+      - run: python main.py watch
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
+      - uses: actions/cache/save@v4
+        if: always()
+        with: { path: state, key: "state-watch-${{ github.run_id }}" }

@@ -1,0 +1,43 @@
+# Chainsense bot config. Copy to config.yaml and edit.
+
+schedule:
+  daily_time: "06:00"        # Lagos time, used by `python main.py serve`
+  watch_every_minutes: 10
+
+# Always shown in the brief (CoinGecko ids)
+majors: [bitcoin, ethereum, solana, binancecoin, ripple, the-open-network, sui]
+
+tvl_chains: [Ethereum, Solana, Base, BSC, Tron, Arbitrum, Sui, Hyperliquid L1]
+
+alerts:
+  price_move_pct: 5          # alert when a watched token moves this much since its last alert
+
+ai:
+  model: claude-sonnet-5     # used only if ANTHROPIC_API_KEY is set
+
+watchlist:
+  # Tokens: find the id on the coin's CoinGecko page ("API ID")
+  tokens:
+    # - {coingecko_id: pepe, label: PEPE}
+    # - {coingecko_id: jupiter-exchange-solana, label: JUP}
+
+  # Wallets to verify on-chain. chain: eth | base | arbitrum | optimism | polygon | gnosis | bitcoin | solana
+  wallets:
+    # - {label: "My ETH wallet", chain: eth, address: "0x...", min_amount: 0}
+    # - {label: "Treasury BTC", chain: bitcoin, address: "bc1q...", min_amount: 0.01}
+    # - {label: "SOL wallet", chain: solana, address: "...", min_amount: 1}
+
+  # Whale transfers of a token contract (EVM). min_amount is in token units.
+  # Reads the newest ~200 transfers each run, so it suits mid/small-volume tokens
+  # (a project token, a memecoin you cover). For USDT/USDC that's only minutes of
+  # activity — the daily cloud brief covers stablecoin whales via news + verification.
+  token_whales:
+    # - {label: "PEPE whales", chain: eth, contract: "0x6982508145454Ce325dDbE47a25d4ec3d2311933", min_amount: 5000000000}
+
+news_feeds:
+  CoinDesk: https://www.coindesk.com/arc/outboundfeeds/rss/
+  Cointelegraph: https://cointelegraph.com/rss
+  Decrypt: https://decrypt.co/feed
+  The Block: https://www.theblock.co/rss.xml
+  Bitcoin Magazine: https://bitcoinmagazine.com/.rss/full/
+  Nairametrics (crypto): https://nairametrics.com/category/cryptocurrency/feed/
