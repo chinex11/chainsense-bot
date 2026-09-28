@@ -77,10 +77,19 @@ def send(text_html: str, dry_run: bool = False) -> None:
             print("[notify] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — printing instead.\n")
         print(text_html)
         return
+    failed: dict[str, str] = {}
     for chunk in _split(text_html, 3900):
-        post_json(f"https://api.telegram.org/bot{token}/sendMessage",
-                  {"chat_id": chat, "text": chunk, "parse_mode": "HTML",
-                   "disable_web_page_preview": True})
+        for chat_id in [c.strip() for c in chat.split(",") if c.strip()]:
+            if chat_id in failed:
+                continue
+            try:
+                post_json(f"https://api.telegram.org/bot{token}/sendMessage",
+                          {"chat_id": chat_id, "text": chunk, "parse_mode": "HTML",
+                           "disable_web_page_preview": True})
+            except Exception as e:  # noqa: BLE001 — keep delivering to the others
+                failed[chat_id] = str(e)
+    if failed:
+        raise RuntimeError("Could not deliver to " + "; ".join(f"{c}: {m}" for c, m in failed.items()))
 
 
 def _split(text: str, limit: int) -> list[str]:
