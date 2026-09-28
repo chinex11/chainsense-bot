@@ -41,12 +41,16 @@ def post_json(url: str, payload: dict, headers: dict | None = None,
             if r.status_code == 429:
                 time.sleep(5 * (attempt + 1))
                 continue
+            if 400 <= r.status_code < 500:  # client errors won't fix themselves; show the reason
+                raise FetchError(f"POST {url.split('/bot')[0]}… returned {r.status_code}: {r.text[:300]}")
             r.raise_for_status()
             return r.json()
+        except FetchError:
+            raise
         except Exception as e:  # noqa: BLE001
             last = e
             time.sleep(1.5 * (attempt + 1))
-    raise FetchError(f"POST {url} failed: {last}")
+    raise FetchError(f"POST {url.split('/bot')[0]} failed: {last}")
 
 
 def get_text(url: str, timeout: int = 20) -> str:

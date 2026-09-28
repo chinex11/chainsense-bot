@@ -68,6 +68,10 @@ def esc(s) -> str:
 def send(text_html: str, dry_run: bool = False) -> None:
     """Send Telegram HTML, split under the 4096-char limit. Falls back to printing."""
     token, chat = os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
+    if not dry_run and os.getenv("GITHUB_ACTIONS") and not (token and chat):
+        missing = [n for n, v in (("TELEGRAM_BOT_TOKEN", token), ("TELEGRAM_CHAT_ID", chat)) if not v]
+        raise SystemExit(f"ERROR: GitHub secret(s) missing or empty: {', '.join(missing)}. "
+                         "Add them under Settings → Secrets and variables → Actions.")
     if dry_run or not (token and chat):
         if not dry_run:
             print("[notify] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — printing instead.\n")
